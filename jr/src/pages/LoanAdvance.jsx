@@ -15,7 +15,7 @@ export default function LoanAdvanceCards() {
   // Fetch all employees
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/employees");
+      const res = await fetch("https://jr-dtx9.onrender.com/api/employees");
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -48,7 +48,7 @@ export default function LoanAdvanceCards() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5000/api/loan-advance", {
+      const res = await fetch("https://jr-dtx9.onrender.com/api/loan-advance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId, type, amount }),
@@ -72,7 +72,7 @@ export default function LoanAdvanceCards() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5000/api/loan-advance", {
+      const res = await fetch("https://jr-dtx9.onrender.com/api/loan-advance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId, type: "RepaidLoan", amount: repayAmount }),

@@ -13,7 +13,7 @@ export default function ExtraHour() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/employees");
+      const res = await fetch("https://jr-dtx9.onrender.com/api/employees");
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -23,7 +23,7 @@ export default function ExtraHour() {
 
   const fetchSaved = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/extra-hours");
+      const res = await fetch("https://jr-dtx9.onrender.com/api/extra-hours");
       const data = await res.json();
 
       const formatted = {};
@@ -48,7 +48,7 @@ export default function ExtraHour() {
 
   const handleSave = async (empId, late, extra) => {
     try {
-      const res = await fetch("http://localhost:5000/api/extra-hours", {
+      const res = await fetch("https://jr-dtx9.onrender.com/api/extra-hours", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,7 +80,7 @@ export default function ExtraHour() {
 
   const handleDelete = async (recordId, empId, value) => {
     try {
-      await fetch(`http://localhost:5000/api/extra-hours/${recordId}`, {
+      await fetch(`https://jr-dtx9.onrender.com/api/extra-hours/${recordId}`, {
         method: "DELETE",
       });
 

@@ -16,7 +16,7 @@ export default function Employee() {
   // Fetch employees from backend
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/employees");
+      const res = await fetch("https://jr-dtx9.onrender.com/api/employees");
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -48,8 +48,8 @@ export default function Employee() {
 
     try {
       const url = editingId
-        ? `http://localhost:5000/api/employees/${editingId}`
-        : "http://localhost:5000/api/employees";
+        ? `https://jr-dtx9.onrender.com/api/employees/${editingId}`
+        : "https://jr-dtx9.onrender.com/api/employees";
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
