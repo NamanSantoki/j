@@ -10,7 +10,7 @@ export default function Report() {
   // Fetch report from backend
   const fetchReport = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/report?month=${month}`);
+      const res = await fetch(`https://jr-dtx9.onrender.com/api/report?month=${month}`);
       const data = await res.json();
       setReport(data);
     } catch (err) {

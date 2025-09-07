@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ExtraHour from "./ExtraHours";
+
 export default function AttendancePage() {
   const [employees, setEmployees] = useState([]);
   const [month, setMonth] = useState(
@@ -24,7 +24,8 @@ export default function AttendancePage() {
       if (employees.length === 0) return;
 
       try {
-        const res = await fetch(`http://localhost:5000/api/attendance/${month}`);
+        const res = await fetch(`https://jr-dtx9.onrender.com/api/report?month=${month}`);
+
         const data = await res.json();
 
         const newAttendance = {};

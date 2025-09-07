@@ -77,7 +77,7 @@ export default function Employee() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this employee?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/employees/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://jr-dtx9.onrender.com/api/employees/${id}`, { method: "DELETE" });
       if (res.ok) {
         setMessage("Employee deleted successfully!");
         fetchEmployees();

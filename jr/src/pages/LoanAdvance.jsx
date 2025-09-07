@@ -27,7 +27,7 @@ export default function LoanAdvanceCards() {
   const fetchEntries = async (employeeId, type) => {
     if (!employeeId) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/loan-advance/${employeeId}`);
+      const res = await fetch(`https://jr-dtx9.onrender.com/api/loan-advance/${employeeId}`);
       const data = await res.json();
       if (type === "Loan") setLoanEntries(data.filter(e => e.type === "Loan" || e.type === "RepaidLoan"));
       else setAdvanceEntries(data.filter(e => e.type === "Advance"));
@@ -92,7 +92,7 @@ export default function LoanAdvanceCards() {
   const handleDelete = async (id, type, employeeId) => {
     if (!window.confirm("Are you sure to delete this entry?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/loan-advance/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://jr-dtx9.onrender.com/api/loan-advance/${id}`, { method: "DELETE" });
       if (res.ok) {
         setMessage("Deleted successfully!");
         fetchEntries(employeeId, type === "Advance" ? "Advance" : "Loan");
