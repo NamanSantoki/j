@@ -1,12 +1,12 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Navbar from "./Components/Navbar";
-import Login from "./pages/Login";
-import Attendance from "./pages/Attendance";
-import LoanAdvance from "./pages/Loanadvance";
-import Report from "./pages/Report";
-import Settings from "./pages/Settings";
-import ExtraHour from "./pages/ExtraHours";
-import Employee from "./pages/Employee";
+import Login from "./Pages/Login";
+import Attendance from "./Pages/Attendance";
+import LoanAdvance from "./pages/LoanAdvance";
+import Report from "./Pages/Report";
+import Settings from "./Pages/Settings";
+import ExtraHour from "./Pages/ExtraHours";
+import Employee from "./Pages/Employee";
 
 
 function Layout() {

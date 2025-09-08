@@ -8,3 +8,4 @@ const loanAdvanceSchema = new mongoose.Schema({
 });
 
 export default mongoose.model("LoanAdvance", loanAdvanceSchema);
+  
