@@ -5,7 +5,7 @@ import Attendance from "./pages/Attendance";
 import LoanAdvance from "./pages/LoanAdvance";
 import Report from "./pages/Report";
 import Settings from "./pages/Settings";
-import ExtraHour from "./pPages/ExtraHours";
+import ExtraHour from "./pages/ExtraHours";
 import Employee from "./pages/Employee";
 
 
