@@ -15,7 +15,7 @@ export default function LoanAdvanceCards() {
   // Fetch all employees
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("https://j-backend.onrender.com/api/employees");
+      const res = await fetch("https://j-uzbc.onrender.com/api/employees");
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -27,7 +27,7 @@ export default function LoanAdvanceCards() {
   const fetchEntries = async (employeeId, type) => {
     if (!employeeId) return;
     try {
-      const res = await fetch(`https://j-backend.onrender.com/api/loan-advance/${employeeId}`);
+      const res = await fetch(`https://j-uzbc.onrender.com/api/loan-advance/${employeeId}`);
       const data = await res.json();
       if (type === "Loan") setLoanEntries(data.filter(e => e.type === "Loan" || e.type === "RepaidLoan"));
       else setAdvanceEntries(data.filter(e => e.type === "Advance"));
@@ -48,7 +48,7 @@ export default function LoanAdvanceCards() {
       return;
     }
     try {
-      const res = await fetch("https://j-backend.onrender.com/api/loan-advance", {
+      const res = await fetch("https://j-uzbc.onrender.com/api/loan-advance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId, type, amount }),
@@ -72,7 +72,7 @@ export default function LoanAdvanceCards() {
       return;
     }
     try {
-      const res = await fetch("https://j-dtx9.onrender.com/api/loan-advance", {
+      const res = await fetch("https://j-uzbc.onrender.com/api/loan-advance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId, type: "RepaidLoan", amount: repayAmount }),
@@ -92,7 +92,7 @@ export default function LoanAdvanceCards() {
   const handleDelete = async (id, type, employeeId) => {
     if (!window.confirm("Are you sure to delete this entry?")) return;
     try {
-      const res = await fetch(`https://j-backend.onrender.com/api/loan-advance/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://j-uzbc.onrender.com/api/loan-advance/${id}`, { method: "DELETE" });
       if (res.ok) {
         setMessage("Deleted successfully!");
         fetchEntries(employeeId, type === "Advance" ? "Advance" : "Loan");

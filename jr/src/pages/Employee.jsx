@@ -16,7 +16,7 @@ export default function Employee() {
   // Fetch employees from backend
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("https://j-backend.onrender.com/api/employees");
+      const res = await fetch("https://j-uzbc.onrender.com/api/employees");
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -48,8 +48,8 @@ export default function Employee() {
 
     try {
       const url = editingId
-        ? `https://j-backend.onrender.com/api/employees/${editingId}`
-        : "https://j-backend.onrender.com/api/employees";
+        ? `https://j-uzbc.onrender.com/api/employees/${editingId}`
+        : "https://j-uzbc.onrender.com/api/employees";
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -77,7 +77,7 @@ export default function Employee() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this employee?")) return;
     try {
-      const res = await fetch(`https://j-backend.onrender.com/api/employees/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://j-uzbc.onrender.com/api/employees/${id}`, { method: "DELETE" });
       if (res.ok) {
         setMessage("Employee deleted successfully!");
         fetchEmployees();
