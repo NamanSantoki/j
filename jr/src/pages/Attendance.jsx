@@ -10,7 +10,7 @@ export default function AttendancePage() {
   // Fetch employees from backend
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("https://jr-dtx9.onrender.com/api/employees");
+      const res = await fetch("https://j-backend.onrender.com/api/employees");
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -24,7 +24,7 @@ export default function AttendancePage() {
       if (employees.length === 0) return;
 
       try {
-        const res = await fetch(`https://jr-dtx9.onrender.com/api/report?month=${month}`);
+        const res = await fetch(`https://j-backend.onrender.com/api/report?month=${month}`);
 
         const data = await res.json();
 
@@ -82,7 +82,7 @@ export default function AttendancePage() {
   // Save attendance to backend
   const handleSave = async () => {
     try {
-      const res = await fetch("https://jr-dtx9.onrender.com/api/attendance", {
+      const res = await fetch("https://j-backend.onrender.com/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ month, attendance }),
