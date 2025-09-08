@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function AuthCard({ onLoginSuccess }) {
+export default function AuthCard() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true); // toggle between login & register
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +27,7 @@ export default function AuthCard({ onLoginSuccess }) {
         if (data.token) {
           localStorage.setItem("token", data.token);
           alert("✅ Login successful!");
-          onLoginSuccess?.(); // navigate to attendance
+          navigate("/attendance"); // go to attendance page
         } else {
           alert(data.error || "Login failed");
         }
@@ -39,6 +41,7 @@ export default function AuthCard({ onLoginSuccess }) {
       }
     } catch (err) {
       console.error(err);
+      alert("❌ Server error. Please try again.");
     }
   }
 
