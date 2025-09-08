@@ -2,7 +2,7 @@ import express from "express";
 import Employee from "../models/Employee.js";
 import Attendance from "../models/Attendance.js";
 import LoanAdvance from "../models/LoanAdvance.js";
-import ExtraHours from "../models/ExtraHours.js";
+import ExtraHours from "../models/ExtraHour.js";
 
 const router = express.Router();
 

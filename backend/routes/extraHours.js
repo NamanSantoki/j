@@ -1,5 +1,5 @@
 import express from "express";
-import ExtraHours from "../models/ExtraHours.js";
+import ExtraHours from "../models/ExtraHour.js";
 import Employee from "../models/Employee.js";
 
 const router = express.Router();
