@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function AuthCard() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true); // toggle between login & register
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -23,25 +24,22 @@ export default function AuthCard() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        setMessage(data.error || "❌ Something went wrong");
+        return;
+      }
+
       if (isLogin) {
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          alert("✅ Login successful!");
-          navigate("/attendance"); // go to attendance page
-        } else {
-          alert(data.error || "Login failed");
-        }
+        localStorage.setItem("token", data.token);
+        setMessage("✅ Login successful!");
+        navigate("/attendance"); // redirect
       } else {
-        if (data.message) {
-          alert("✅ Registration successful! You can now log in.");
-          setIsLogin(true); // switch to login after register
-        } else {
-          alert(data.error || "Registration failed");
-        }
+        setMessage("✅ Registration successful! You can now log in.");
+        setIsLogin(true); // switch to login after register
       }
     } catch (err) {
       console.error(err);
-      alert("❌ Server error. Please try again.");
+      setMessage("❌ Server error. Please try again.");
     }
   }
 
@@ -52,8 +50,9 @@ export default function AuthCard() {
           {isLogin ? "Jalaram Employee Login" : "Employee Registration"}
         </h2>
 
+        {message && <p className="text-center text-sm text-red-600 mb-4">{message}</p>}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email */}
           <div>
             <label className="block text-gray-600 mb-1">Email</label>
             <input
@@ -66,7 +65,6 @@ export default function AuthCard() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-600 mb-1">Password</label>
             <input
@@ -79,7 +77,6 @@ export default function AuthCard() {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
