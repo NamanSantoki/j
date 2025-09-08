@@ -1,13 +1,12 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Login from "./pages/Login";
+import AuthCard from "./pages/AuthCard";   // ✅ new single card
 import Attendance from "./pages/Attendance";
 import LoanAdvance from "./pages/LoanAdvance";
 import Report from "./pages/Report";
 import Settings from "./pages/Settings";
 import ExtraHour from "./pages/ExtraHours";
 import Employee from "./pages/Employee";
-
 
 function Layout() {
   return (
@@ -23,8 +22,8 @@ function Layout() {
 export default function App() {
   return (
     <Routes>
-      {/* Login outside of Layout (no Navbar on login page) */}
-      <Route path="/login" element={<Login />} />
+      {/* AuthCard outside of Layout (no Navbar here) */}
+      <Route path="/auth" element={<AuthCard />} />
 
       {/* Protected area with Navbar */}
       <Route element={<Layout />}>
@@ -35,12 +34,12 @@ export default function App() {
         <Route path="/employee" element={<Employee />} />
         <Route path="/extra-hours" element={<ExtraHour />} />
 
-        {/* Redirect root to login */}
-        <Route index element={<Navigate to="/login" replace />} />
+        {/* Redirect root to AuthCard */}
+        <Route index element={<Navigate to="/auth" replace />} />
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   );
 }

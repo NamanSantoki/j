@@ -1,11 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import icon from "../components/icon.jpg"; // make sure icon.png is in the same directory
+import icon from "../components/icon.jpg"; 
 
 export default function Navbar() {
   const navigate = useNavigate();
 
   function handleAddEmployee() {
-    navigate("/employee"); // Navigate to Employee page
+    navigate("/employee"); 
   }
 
   return (
