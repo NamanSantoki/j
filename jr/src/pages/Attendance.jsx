@@ -11,10 +11,12 @@ export default function AttendancePage() {
   const fetchEmployees = async () => {
     try {
       const res = await fetch("https://j-uzbc.onrender.com/api/employees");
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching employees:", err);
+      alert("Failed to load employees");
     }
   };
 
@@ -24,8 +26,8 @@ export default function AttendancePage() {
       if (employees.length === 0) return;
 
       try {
-        const res = await fetch(`https://j-uzbc.onrender.com/api/report?month=${month}`);
-
+        const res = await fetch(`https://j-uzbc.onrender.com/api/attendance/${month}`);
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
 
         const newAttendance = {};
@@ -52,7 +54,8 @@ export default function AttendancePage() {
 
         setAttendance(newAttendance);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching attendance:", err);
+        alert("Failed to load attendance data");
       }
     };
 
@@ -74,10 +77,8 @@ export default function AttendancePage() {
     });
   };
 
-  const daysInMonth = new Date(
-    ...month.split("-").map((x, i) => (i === 1 ? x : x - 1)),
-    0
-  ).getDate();
+  const [year, monthIndex] = month.split("-").map(Number);
+  const daysInMonth = new Date(year, monthIndex, 0).getDate();
 
   // Save attendance to backend
   const handleSave = async () => {
@@ -87,9 +88,13 @@ export default function AttendancePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ month, attendance }),
       });
-      if (res.ok) alert("Attendance saved successfully!");
+      if (res.ok) {
+        alert("Attendance saved successfully!");
+      } else {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Error saving attendance:", err);
       alert("Error saving attendance");
     }
   };
@@ -134,7 +139,6 @@ export default function AttendancePage() {
                   </th>
                 );
               })}
-              
               <th className="border px-2 py-1">A</th>
               <th className="border px-2 py-1 bg-gray-100">Shift</th>
             </tr>
@@ -168,7 +172,6 @@ export default function AttendancePage() {
                       </td>
                     );
                   })}
-                  
                   <td className="border px-2 py-1 text-center">{totalA}</td>
                   <td className="border px-2 py-1 text-center">{emp.shift}</td>
                 </tr>
@@ -176,9 +179,7 @@ export default function AttendancePage() {
             })}
           </tbody>
         </table>
-        
       </div>
-      
     </div>
   );
 }
