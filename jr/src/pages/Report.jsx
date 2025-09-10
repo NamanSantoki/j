@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 
+
 export default function Report() {
   const [month, setMonth] = useState(
     `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
   );
   const [report, setReport] = useState([]);
-  const [expanded, setExpanded] = useState({}); // Track expanded rows
 
-  // Fetch report from backend
   const fetchReport = async () => {
     try {
       const res = await fetch(`https://j-uzbc.onrender.com/api/report?month=${month}`);
@@ -22,118 +21,94 @@ export default function Report() {
     fetchReport();
   }, [month]);
 
-  // Function to calculate adjusted net salary
-  // Utility to get total days in month
   const getTotalDaysInMonth = (monthStr) => {
     const [year, month] = monthStr.split("-").map(Number);
-    return new Date(year, month, 0).getDate(); // last day of the month
+    return new Date(year, month, 0).getDate();
   };
 
-  // Function to calculate net salary
   const calculateNet = (emp) => {
-    const totalDays = getTotalDaysInMonth(month); // month from state
+    const totalDays = getTotalDaysInMonth(month);
     const totalSalary = Number(emp.totalSalary || 0);
     const perDaySalary = totalSalary / totalDays;
     const perHour = emp.shift === "12hrs" ? perDaySalary / 12 : perDaySalary / 8;
 
     let net = totalSalary;
 
-    // Adjust for extra/late hours
     if (emp.extraHours && emp.extraHours.length > 0) {
       emp.extraHours.forEach((rec) => {
-        const late = Number(rec.late || 0);
-        const extra = Number(rec.extra || 0);
-        net += extra * perHour;
-        net -= late * perHour;
+        net += (Number(rec.extra) || 0) * perHour;
+        net -= (Number(rec.late) || 0) * perHour;
       });
     }
 
-    // Subtract absent days
-    net -= perDaySalary * (Number(emp.absentDays || 0));
+    net -= perDaySalary * (Number(emp.absentDays) || 0);
     net -= Number(emp.advanceGiven || 0);
 
-    return net.toFixed(2);
+    return Math.round(net); // integer only
   };
-  // Add this function inside your Report component
-  const handlePrint = (emp) => {
-    const totalDays = new Date(
-      new Date(month + "-01").getFullYear(),
-      new Date(month + "-01").getMonth() + 1,
-      0
-    ).getDate();
 
-    const perDaySalary = emp.totalSalary / totalDays;
-    const perHour = emp.shift === "12hrs" ? perDaySalary / 12 : perDaySalary / 8;
+  // Print whole report page (excluding controls)
+  const handlePrintReport = () => {
+    const content = document.getElementById("reportTable").outerHTML;
+    const win = window.open("", "_blank");
+    win.document.write(`
+      <html>
+        <head>
+          <title>Monthly Report - ${month}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 8px; text-align: right; }
+            th { background: #f0f0f0; }
+            td:first-child, th:first-child { text-align: left; }
+          </style>
+        </head>
+        <body>
+          <h2>Monthly Report - ${month}</h2>
+          ${content}
+          <script>window.print()</script>
+        </body>
+      </html>
+    `);
+    win.document.close();
+  };
 
-    let net = emp.totalSalary;
-
-    // Extra/late hours adjustment
-    if (emp.extraHours && emp.extraHours.length > 0) {
-      emp.extraHours.forEach((rec) => {
-        net += (rec.extra || 0) * perHour;
-        net -= (rec.late || 0) * perHour;
-      });
+  // Totals row calculation
+  const totals = report.reduce(
+    (acc, emp) => {
+      acc.basic += emp.basic || 0;
+      acc.hra += emp.hra || 0;
+      acc.conveyance += emp.conveyance || 0;
+      acc.others += emp.others || 0;
+      acc.totalSalary += emp.totalSalary || 0;
+      acc.advanceGiven += emp.advanceGiven || 0;
+      acc.loanGiven += emp.loanGiven || 0;
+      acc.loanRepaid += emp.loanRepaid || 0;
+      acc.loanLeft += emp.loanLeft || 0;
+      acc.netSalary += calculateNet(emp) || 0;
+      return acc;
+    },
+    {
+      basic: 0,
+      hra: 0,
+      conveyance: 0,
+      others: 0,
+      totalSalary: 0,
+      advanceGiven: 0,
+      loanGiven: 0,
+      loanRepaid: 0,
+      loanLeft: 0,
+      netSalary: 0,
     }
-
-    // Absent days deduction
-    net -= perDaySalary * (emp.absentDays || 0);
-
-    const slipWindow = window.open("", "_blank", "width=600,height=700");
-    slipWindow.document.write(`
-    <html>
-  <head>
-    <title>Salary Slip - ${emp.employeeName}</title>
-    <style>
-      body { font-family: Arial, sans-serif; padding: 20px; }
-      .header { display: flex; align-items: center; margin-bottom: 20px; }
-      .logo { width: 20px; height: 20px; ; margin-right: 20px; }
-      .title { text-align: center; flex: 1; }
-      h2 {  margin: 0; }
-      h3 { margin: 5px 0 0 0; font-weight: normal; font-size: 16px; }
-      table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-      td, th { border: 1px solid #000; padding: 8px; text-align: left; }
-      th { background-color: #f0f0f0; }
-      button { padding: 8px 16px; background-color: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-      button:hover { background-color: #45a049; }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <img style="width: 100px; height: 100px; margin-right: 20px;" src="/icon.jpg" alt="Logo" className="logo" />
-      <div class="title">
-        <h1>Jalaram Wiremesh</h1>
-      </div>
-    </div>
-
-    <h2>Salary Slip - ${emp.employeeName}</h2>
-    <h3>Month: ${month}</h3>
-
-    <table>
-      <tr><th>Total Salary</th><td>${emp.totalSalary}</td></tr>
-      <tr><th>Present Days</th><td>${emp.presentDays}</td></tr>
-      <tr><th>Absent Days</th><td>${emp.absentDays}</td></tr>
-      <tr><th>Advance Given</th><td>${emp.advanceGiven}</td></tr>
-      <tr><th>Loan Given</th><td>${emp.loanGiven}</td></tr>
-      <tr><th>Loan Repaid</th><td>${emp.loanRepaid}</td></tr>
-      <tr><th>Loan Left</th><td>${emp.loanLeft}</td></tr>
-      <tr><th>Net Salary</th><td>${net.toFixed(2)}</td></tr>
-    </table>
-    <button onclick="window.print()">Print</button>
-  </body>
-</html>
-
-  `);
-  };
-
+  );
 
   return (
-    <div className="max-w-7xl mx-auto mt-10">
-      <h1 className="text-3xl font-bold mb-6">Monthly Report</h1>
+    <div className=" w-full h-full bg-blue-100 rounded-2xl p-4 mt-5">
+      <h1 className="text-4xl  text-black font-bold mb-6">Monthly Report</h1>
 
-      {/* Month Selector */}
-      <div className="mb-6">
-        <label className="mr-2 font-semibold">Select Month:</label>
-
+      {/* Month Selector + Buttons */}
+      <div className="mb-6 flex items-center gap-3">
+        <label className=" text-blue-800 font-semibold">Select Month:</label>
         <input
           type="month"
           value={month}
@@ -142,77 +117,88 @@ export default function Report() {
         />
         <button
           onClick={fetchReport}
-          className="ml-4 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
         >
           Refresh
+        </button>
+        <button
+          onClick={handlePrintReport}
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+        >
+          Print Report
         </button>
       </div>
 
       {/* Report Table */}
-      <div className="overflow-x-auto">
-        <table className="table-auto border-collapse border border-gray-300 w-full">
-          <thead className="bg-gray-100">
+      <div className="w-full">
+        <table
+          id="reportTable"
+          className="table-auto border-collapse border border-gray-100 w-full"
+        >
+          <thead className="bg-violet-300">
             <tr>
               <th className="border px-3 py-2">Employee</th>
-              <th className="border px-3 py-2">Shift</th>
               <th className="border px-3 py-2">Basic</th>
               <th className="border px-3 py-2">HRA</th>
+              <th className="border px-3 py-2">Conveyance</th>
               <th className="border px-3 py-2">Other</th>
-              <th className="border px-3 py-2">Allowances</th>
               <th className="border px-3 py-2">Total Salary</th>
               <th className="border px-3 py-2">Present Days</th>
               <th className="border px-3 py-2">Absent Days</th>
               <th className="border px-3 py-2">Advance Given</th>
-
               <th className="border px-3 py-2">Loan Given</th>
               <th className="border px-3 py-2">Loan Repaid</th>
               <th className="border px-3 py-2">Loan Left</th>
               <th className="border px-3 py-2">Net Salary</th>
-              <th className="border px-3 py-2">Details</th>
             </tr>
           </thead>
           <tbody>
             {report.map((emp, idx) => (
-              <>
-                <tr key={idx}>
-                  <td className="border px-3 py-2 font-semibold">{emp.employeeName}</td>
-                  <td className="border px-3 py-2 text-center">{emp.shift}</td>
-                  <td className="border px-3 py-2 text-right">{emp.basic}</td>
-                  <td className="border px-3 py-2 text-right">{emp.hra}</td>
-                  <td className="border px-3 py-2 text-right">{emp.conveyance}</td>
-                  <td className="border px-3 py-2 text-right">{emp.others}</td>
-                  <td className="border px-3 py-2 text-right">{emp.totalSalary}</td>
-                  <td className="border px-3 py-2 text-center">{emp.presentDays}</td>
-                  <td className="border px-3 py-2 text-center">{emp.absentDays}</td>
-                  <td className="border px-3 py-2 text-right">{emp.advanceGiven}</td>
-                  <td className="border px-3 py-2 text-right">{emp.loanGiven}</td>
-                  <td className="border px-3 py-2 text-right">{emp.loanRepaid}</td>
-                  <td className="border px-3 py-2 text-right">{emp.loanLeft}</td>
-                  <td className={`border px-3 py-2 font-bold text-right ${calculateNet(emp) < 0 ? "text-red-600" : calculateNet(emp) > 0 ? "text-green-600" : "text-gray-600"}`}>
-                    {calculateNet(emp)}
-                  </td>
-
-                  <td className="border px-3 py-2 text-center">
-                    <button
-                      onClick={() => handlePrint(emp)}
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
-                    >
-                      Print
-                    </button>
-                  </td>
-
-                </tr>
-
-
-              </>
+              <tr key={idx}>
+                <td className="border px-3 py-2 font-semibold">{emp.employeeName}</td>
+                <td className="border px-3 py-2 text-right">{emp.basic}</td>
+                <td className="border px-3 py-2 text-right">{emp.hra}</td>
+                <td className="border px-3 py-2 text-right">{emp.conveyance}</td>
+                <td className="border px-3 py-2 text-right">{emp.others}</td>
+                <td className="border px-3 py-2 text-right">{emp.totalSalary}</td>
+                <td className="border px-3 py-2 text-center">{emp.presentDays}</td>
+                <td className="border px-3 py-2 text-center">{emp.absentDays}</td>
+                <td className="border px-3 py-2 text-right">{emp.advanceGiven}</td>
+                <td className="border px-3 py-2 text-right">{emp.loanGiven}</td>
+                <td className="border px-3 py-2 text-right">{emp.loanRepaid}</td>
+                <td className="border px-3 py-2 text-right">{emp.loanLeft}</td>
+                <td
+                  className={`border px-3 py-2 font-bold text-right ${
+                    calculateNet(emp) < 0
+                      ? "text-red-600"
+                      : calculateNet(emp) > 0
+                      ? "text-green-600"
+                      : "text-yellow-100"
+                  }`}
+                >
+                  {calculateNet(emp)}
+                </td>
+              </tr>
             ))}
+            {/* Totals Row */}
+            <tr className="bg-blue-300 font-bold">
+              <td className="border px-3 py-2 text-center">TOTAL</td>
+              <td className="border px-3 py-2 text-right">{totals.basic}</td>
+              <td className="border px-3 py-2 text-right">{totals.hra}</td>
+              <td className="border px-3 py-2 text-right">{totals.conveyance}</td>
+              <td className="border px-3 py-2 text-right">{totals.others}</td>
+              <td className="border  px-3 py-2 text-right">{totals.totalSalary}</td>
+              <td className="border px-3 py-2"></td>
+              <td className="border px-3 py-2"></td>
+              <td className="border px-3 py-2 text-right">{totals.advanceGiven}</td>
+              <td className="border px-3 py-2 text-right">{totals.loanGiven}</td>
+              <td className="border px-3 py-2 text-right">{totals.loanRepaid}</td>
+              <td className="border px-3 py-2 text-right">{totals.loanLeft}</td>
+              <td className=" border px-3 py-2 text-right">{totals.netSalary}</td>
+            </tr>
           </tbody>
-
         </table>
-        
       </div>
-
-      
     </div>
   );
 }

@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 export default function AttendancePage() {
   const [employees, setEmployees] = useState([]);
   const [month, setMonth] = useState(
-    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
+    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`
   );
   const [attendance, setAttendance] = useState({});
 
@@ -26,7 +29,9 @@ export default function AttendancePage() {
       if (employees.length === 0) return;
 
       try {
-        const res = await fetch(`https://j-uzbc.onrender.com/api/attendance/${month}`);
+        const res = await fetch(
+          `https://j-uzbc.onrender.com/api/attendance/${month}`
+        );
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
 
@@ -34,17 +39,16 @@ export default function AttendancePage() {
         const [year, monthIndex] = month.split("-").map(Number);
         const daysInMonth = new Date(year, monthIndex, 0).getDate();
 
-        employees.forEach(emp => {
-          const saved = data.find(a => a.employeeId?._id === emp._id);
+        employees.forEach((emp) => {
+          const saved = data.find((a) => a.employeeId?._id === emp._id);
           const empData = {};
 
           for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, monthIndex - 1, day);
-            const isSunday = date.getDay() === 0;
-
             if (saved && saved.attendance && saved.attendance[day]) {
               empData[day] = saved.attendance[day];
             } else {
+              const date = new Date(year, monthIndex - 1, day);
+              const isSunday = date.getDay() === 0;
               empData[day] = isSunday ? "H" : "P";
             }
           }
@@ -69,7 +73,7 @@ export default function AttendancePage() {
 
   const toggleAttendance = (empId, day) => {
     const current = attendance[empId][day];
-    if (current === "H") return; // do not change holidays
+    if (current === "H") return; // keep H unchangeable by click
     const next = current === "P" ? "A" : "P";
     setAttendance({
       ...attendance,
@@ -79,6 +83,37 @@ export default function AttendancePage() {
 
   const [year, monthIndex] = month.split("-").map(Number);
   const daysInMonth = new Date(year, monthIndex, 0).getDate();
+
+  // helper: check if a Sunday is sandwiched between absents
+  const isSandwichedAbsentSunday = (empAttendance, day) => {
+    const date = new Date(year, monthIndex - 1, day);
+    if (date.getDay() !== 0) return false; // only Sundays
+
+    let prevAbsent = false;
+    let nextAbsent = false;
+
+    // look backward
+    for (let d = day - 1; d >= 1; d--) {
+      const val = empAttendance[d];
+      if (val === "A") {
+        prevAbsent = true;
+        break;
+      }
+      if (val === "P") break;
+    }
+
+    // look forward
+    for (let d = day + 1; d <= daysInMonth; d++) {
+      const val = empAttendance[d];
+      if (val === "A") {
+        nextAbsent = true;
+        break;
+      }
+      if (val === "P") break;
+    }
+
+    return prevAbsent && nextAbsent;
+  };
 
   // Save attendance to backend
   const handleSave = async () => {
@@ -125,15 +160,23 @@ export default function AttendancePage() {
         <table className="table-auto border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th className="border px-2 py-1 sticky left-0 bg-gray-100 z-10">Employee</th>
+              <th className="border px-2 py-1 sticky left-0 bg-gray-100 z-10">
+                Employee
+              </th>
               {[...Array(daysInMonth)].map((_, i) => {
                 const day = i + 1;
-                const date = new Date(month.split("-")[0], month.split("-")[1] - 1, day);
+                const date = new Date(
+                  month.split("-")[0],
+                  month.split("-")[1] - 1,
+                  day
+                );
                 const isSunday = date.getDay() === 0;
                 return (
                   <th
                     key={day}
-                    className={`border px-2 py-1 ${isSunday ? "bg-gray-200 text-red-600 font-bold" : ""}`}
+                    className={`border px-2 py-1 ${
+                      isSunday ? "bg-gray-200 text-red-600 font-bold" : ""
+                    }`}
                   >
                     {day}
                   </th>
@@ -146,22 +189,39 @@ export default function AttendancePage() {
           <tbody>
             {employees.map((emp) => {
               const empAttendance = attendance[emp._id] || {};
-              const totalP = Object.values(empAttendance).filter(v => v === "P").length;
-              const totalA = Object.values(empAttendance).filter(v => v === "A").length;
+              const totalA = Object.entries(empAttendance).filter(([day, val]) => {
+                if (val === "A") return true;
+                // count sandwiched Sundays as absent
+                if (
+                  val === "H" &&
+                  isSandwichedAbsentSunday(empAttendance, Number(day))
+                ) {
+                  return true;
+                }
+                return false;
+              }).length;
 
               return (
                 <tr key={emp._id}>
-                  <td className="border px-2 py-1 font-semibold sticky left-0 bg-gray-50">{emp.name}</td>
+                  <td className="border px-2 py-1 font-semibold sticky left-0 bg-gray-50">
+                    {emp.name}
+                  </td>
                   {[...Array(daysInMonth)].map((_, i) => {
                     const day = i + 1;
                     const status = empAttendance[day] || "";
                     const isHoliday = status === "H";
+                    const isSandwich =
+                      isHoliday &&
+                      isSandwichedAbsentSunday(empAttendance, day);
+
                     return (
                       <td
                         key={day}
                         className={`border px-2 py-1 text-center cursor-pointer ${
                           isHoliday
-                            ? "bg-gray-200 text-gray-500 font-bold"
+                            ? isSandwich
+                              ? "bg-red-200 text-red-600 font-bold" // holiday but counted absent
+                              : "bg-gray-200 text-gray-500 font-bold" // normal holiday
                             : status === "P"
                             ? "bg-green-100"
                             : "bg-red-100"
